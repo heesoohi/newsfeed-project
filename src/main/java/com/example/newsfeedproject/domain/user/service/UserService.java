@@ -1,5 +1,7 @@
 package com.example.newsfeedproject.domain.user.service;
 
+import com.example.newsfeedproject.common.exception.CustomException;
+import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.auth.dto.SignupRequest;
 import com.example.newsfeedproject.domain.user.dto.UserSaveResponse;
 import com.example.newsfeedproject.domain.user.entity.User;
@@ -15,7 +17,7 @@ public class UserService {
 
     public UserSaveResponse save(SignupRequest dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalStateException("이미 가입된 이메일 입니다.");
+            throw new CustomException(ExceptionType.DUPLICATE_EMAIL);
         }
 
         User user = new User(dto.getEmail(), dto.getUsername(), dto.getPassword());
