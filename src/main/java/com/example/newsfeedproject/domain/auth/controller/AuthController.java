@@ -1,6 +1,8 @@
 package com.example.newsfeedproject.domain.auth.controller;
 
+import com.example.newsfeedproject.domain.auth.dto.SignupRequest;
 import com.example.newsfeedproject.domain.auth.service.AuthService;
+import com.example.newsfeedproject.domain.user.dto.UserSaveResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +15,8 @@ public class AuthController {
 
     private final AuthService authService;
 
-//    @PostMapping("/auth/signup")
-//    public ResponseEntity<void> signup(@RequestBody )
+    @PostMapping("/auth/signup")
+    public ResponseEntity<UserSaveResponse> signup(@RequestBody SignupRequest dto) {
+        return ResponseEntity.ok(authService.signup(dto));
+    }
 }
