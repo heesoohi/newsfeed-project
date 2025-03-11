@@ -10,12 +10,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.PatternMatchUtils;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtFilter implements Filter {
+
+    private static final Map<String, String[]> WHITELIST = Map.of(
+            "POST", new String[]{
+                    "/auth/**"
+            },
+            "GET", new String[]{
+                    "/users/**"
+            }
+    );
 
     private final JwtUtil jwtUtil;
 
@@ -29,12 +40,17 @@ public class JwtFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        String url = httpRequest.getRequestURI();
-
-        if (url.startsWith("/auth")) {
+        if (isWhitelist(httpRequest)) {
             chain.doFilter(request, response);
             return;
         }
+
+//        String url = httpRequest.getRequestURI();
+//
+//        if (url.startsWith("/auth")) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
 
         String bearerJwt = httpRequest.getHeader("Authorization");
 
@@ -76,5 +92,17 @@ public class JwtFilter implements Filter {
     @Override
     public void destroy() {
         Filter.super.destroy();
+    }
+
+    private boolean isWhitelist(HttpServletRequest request) {
+        String method = request.getMethod();
+        String path = request.getRequestURI();
+
+        if (!WHITELIST.containsKey(method)) {
+            return false;
+        }
+
+        String[] lists = WHITELIST.get(method);
+        return PatternMatchUtils.simpleMatch(lists, path);
     }
 }

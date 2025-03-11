@@ -4,6 +4,7 @@ import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.auth.dto.SignupRequest;
 import com.example.newsfeedproject.domain.user.dto.UserFindByEmailResponse;
+import com.example.newsfeedproject.domain.user.dto.UserResponse;
 import com.example.newsfeedproject.domain.user.dto.UserSaveResponse;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
@@ -33,5 +34,13 @@ public class UserService {
         );
 
         return new UserFindByEmailResponse(user.getUserId(), user.getEmail(), user.getPassword());
+    }
+
+    public UserResponse getUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
+        );
+
+        return new UserResponse(user.getUserId(), user.getEmail(), user.getUsername(), user.getFollowerCount(), user.getFollowingCount());
     }
 }
