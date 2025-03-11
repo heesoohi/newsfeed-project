@@ -4,7 +4,7 @@ import com.example.newsfeedproject.domain.auth.dto.SigninRequest;
 import com.example.newsfeedproject.domain.auth.dto.SigninResponse;
 import com.example.newsfeedproject.domain.auth.dto.SignupRequest;
 import com.example.newsfeedproject.domain.auth.service.AuthService;
-import com.example.newsfeedproject.domain.user.dto.UserSaveResponse;
+import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +24,10 @@ public class AuthController {
 
     @PostMapping("/auth/signin")
     public ResponseEntity<SigninResponse> signin(@RequestBody SigninRequest dto) {
-        return ResponseEntity.ok(authService.signin(dto));
+        SigninResponse signinResponse = authService.signin(dto);
+
+        return ResponseEntity.ok()
+                .header("Authorization", signinResponse.getBearerJwt())
+                .body(signinResponse);
     }
 }

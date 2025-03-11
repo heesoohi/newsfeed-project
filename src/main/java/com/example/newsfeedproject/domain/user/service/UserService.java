@@ -2,10 +2,11 @@ package com.example.newsfeedproject.domain.user.service;
 
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
-import com.example.newsfeedproject.domain.auth.dto.SignupRequest;
-import com.example.newsfeedproject.domain.user.dto.UserFindByEmailResponse;
-import com.example.newsfeedproject.domain.user.dto.UserResponse;
-import com.example.newsfeedproject.domain.user.dto.UserSaveResponse;
+import com.example.newsfeedproject.domain.auth.dto.AuthUser;
+import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
+import com.example.newsfeedproject.domain.user.dto.response.UserFindByEmailResponse;
+import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
+import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +43,13 @@ public class UserService {
         );
 
         return new UserResponse(user.getUserId(), user.getEmail(), user.getUsername(), user.getFollowerCount(), user.getFollowingCount());
+    }
+
+    public void updateUser(AuthUser authUser, UserUpdateRequest dto) {
+        User user = userRepository.findById(authUser.getUserId()).orElseThrow(
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
+        );
+
+        user.update(dto.getUsername());
     }
 }

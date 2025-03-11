@@ -7,8 +7,8 @@ import com.example.newsfeedproject.common.utils.JwtUtil;
 import com.example.newsfeedproject.domain.auth.dto.SigninRequest;
 import com.example.newsfeedproject.domain.auth.dto.SigninResponse;
 import com.example.newsfeedproject.domain.auth.dto.SignupRequest;
-import com.example.newsfeedproject.domain.user.dto.UserFindByEmailResponse;
-import com.example.newsfeedproject.domain.user.dto.UserSaveResponse;
+import com.example.newsfeedproject.domain.user.dto.response.UserFindByEmailResponse;
+import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
 import com.example.newsfeedproject.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,8 +31,8 @@ public class AuthService {
     public SigninResponse signin(SigninRequest dto) {
         UserFindByEmailResponse userResult = userService.findByEmail(dto.getEmail());
 
-        System.out.println("dto password: " + dto.getPassword());
-        System.out.println("user password: " + userResult.getPassword());
+//        System.out.println("dto password: " + dto.getPassword());
+//        System.out.println("user password: " + userResult.getPassword());
 
         if (!passwordEncoder.matches(dto.getPassword(), userResult.getPassword())) {
             throw new CustomException(ExceptionType.INVALID_PASSWORD);

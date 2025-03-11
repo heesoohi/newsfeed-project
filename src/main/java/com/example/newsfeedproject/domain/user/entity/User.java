@@ -56,6 +56,10 @@ public class User extends BaseTimeEntity {
             this.followingCount--;
         }
     }
+
+    public void update(String username) {
+        this.username = username;
+    }
 //
 //    @Builder
 //    public User(String email, String username, String password) {
