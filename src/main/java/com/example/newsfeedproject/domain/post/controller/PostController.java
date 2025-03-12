@@ -47,4 +47,13 @@ public class PostController {
         postService.updatePost(authUser, postId, dto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<Void> deletePost(
+            @Auth AuthUser authUser,
+            @PathVariable Long postId
+    ) {
+        postService.deletePost(authUser, postId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

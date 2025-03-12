@@ -75,4 +75,17 @@ public class PostService {
 
         post.update(dto.getContent());
     }
+
+    @Transactional
+    public void deletePost(AuthUser authUser, Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
+        );
+
+        if (!authUser.getUserId().equals(post.getUserId(postId))) {
+            throw new CustomException(ExceptionType.NO_PERMISSION_ACTION);
+        }
+
+        post.delete();
+    }
 }
