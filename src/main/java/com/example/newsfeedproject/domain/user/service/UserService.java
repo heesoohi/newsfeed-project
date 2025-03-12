@@ -56,7 +56,7 @@ public class UserService {
 
     @Transactional
     public void updateUser(AuthUser authUser, UserUpdateRequest dto) {
-        System.out.println("2222222222");
+
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(
                 () -> new CustomException(ExceptionType.USER_NOT_FOUND)
         );

@@ -1,0 +1,31 @@
+package com.example.newsfeedproject.domain.post.controller;
+
+import com.example.newsfeedproject.common.annotation.Auth;
+import com.example.newsfeedproject.domain.auth.dto.AuthUser;
+import com.example.newsfeedproject.domain.post.dto.PostResponse;
+import com.example.newsfeedproject.domain.post.dto.PostSaveRequest;
+import com.example.newsfeedproject.domain.post.dto.PostSaveResponse;
+import com.example.newsfeedproject.domain.post.service.PostService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+public class PostController {
+
+    private final PostService postService;
+
+    @PostMapping("/posts")
+    public ResponseEntity<PostSaveResponse> savePost(
+            @Auth AuthUser authUser,
+            @RequestBody PostSaveRequest dto
+            ) {
+        return ResponseEntity.ok(postService.savePost(authUser, dto));
+    }
+
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<PostResponse> getPost(@PathVariable Long postId) {
+        return ResponseEntity.ok(postService.getPost(postId));
+    }
+}
