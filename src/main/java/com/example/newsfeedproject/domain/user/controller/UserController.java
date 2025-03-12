@@ -2,9 +2,11 @@ package com.example.newsfeedproject.domain.user.controller;
 
 import com.example.newsfeedproject.common.annotation.Auth;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
+import com.example.newsfeedproject.domain.user.dto.request.UserPasswordUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
 import com.example.newsfeedproject.domain.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +28,18 @@ public class UserController {
     @PutMapping("/users")
     public ResponseEntity<Void> updateUser (
             @Auth AuthUser authUser,
-            @RequestBody UserUpdateRequest dto
-            ) {
+            @Valid @RequestBody UserUpdateRequest dto
+    ) {
         userService.updateUser(authUser, dto);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/users/password")
+    public ResponseEntity<Void> updatePassword (
+            @Auth AuthUser authUser,
+            @Valid @RequestBody UserPasswordUpdateRequest dto
+    ) {
+        userService.updatePassword(authUser, dto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

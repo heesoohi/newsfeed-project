@@ -5,6 +5,7 @@ import com.example.newsfeedproject.domain.auth.dto.SigninResponse;
 import com.example.newsfeedproject.domain.auth.dto.SignupRequest;
 import com.example.newsfeedproject.domain.auth.service.AuthService;
 import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,12 +19,16 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<UserSaveResponse> signup(@RequestBody SignupRequest dto) {
+    public ResponseEntity<UserSaveResponse> signup(
+            @Valid @RequestBody SignupRequest dto
+    ) {
         return ResponseEntity.ok(authService.signup(dto));
     }
 
     @PostMapping("/auth/signin")
-    public ResponseEntity<SigninResponse> signin(@RequestBody SigninRequest dto) {
+    public ResponseEntity<SigninResponse> signin(
+            @Valid @RequestBody SigninRequest dto
+    ) {
         SigninResponse signinResponse = authService.signin(dto);
 
         return ResponseEntity.ok()
