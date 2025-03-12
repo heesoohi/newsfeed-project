@@ -13,7 +13,9 @@ import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +52,9 @@ public class PostService {
     @Transactional(readOnly = true)
     public PaginationResponse<PostResponse> getAll(Pageable pageable) {
 
-        return new PaginationResponse<>(postRepository.findAll(pageable)
+        Pageable tenPostsPerPage = PageRequest.of(pageable.getPageNumber(), 10, Sort.by(Sort.Order.desc("createdAt")));
+
+        return new PaginationResponse<>(postRepository.findAll(tenPostsPerPage)
                 .map(post -> new PostResponse(
                                 post.getPostId(),
                                 post.getContent(),
