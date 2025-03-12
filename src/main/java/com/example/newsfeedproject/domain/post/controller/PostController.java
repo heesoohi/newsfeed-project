@@ -1,12 +1,14 @@
 package com.example.newsfeedproject.domain.post.controller;
 
 import com.example.newsfeedproject.common.annotation.Auth;
+import com.example.newsfeedproject.common.pagination.PaginationResponse;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.post.dto.PostResponse;
 import com.example.newsfeedproject.domain.post.dto.PostSaveRequest;
 import com.example.newsfeedproject.domain.post.dto.PostSaveResponse;
 import com.example.newsfeedproject.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,5 +29,10 @@ public class PostController {
     @GetMapping("/posts/{postId}")
     public ResponseEntity<PostResponse> getPost(@PathVariable Long postId) {
         return ResponseEntity.ok(postService.getPost(postId));
+    }
+
+    @GetMapping("/posts")
+    public ResponseEntity<PaginationResponse<PostResponse>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(postService.getAll(pageable));
     }
 }

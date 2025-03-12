@@ -2,6 +2,7 @@ package com.example.newsfeedproject.domain.post.service;
 
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
+import com.example.newsfeedproject.common.pagination.PaginationResponse;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.post.dto.PostResponse;
 import com.example.newsfeedproject.domain.post.dto.PostSaveRequest;
@@ -11,7 +12,12 @@ import com.example.newsfeedproject.domain.post.repository.PostRepository;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +26,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public PostSaveResponse savePost(AuthUser authUser, PostSaveRequest dto) {
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(
                 () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
@@ -31,6 +38,7 @@ public class PostService {
         return new PostSaveResponse(savedPost.getPostId());
     }
 
+    @Transactional(readOnly = true)
     public PostResponse getPost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
@@ -38,4 +46,20 @@ public class PostService {
 
         return new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt());
     }
+
+    @Transactional(readOnly = true)
+    public PaginationResponse<PostResponse> getAll(Pageable pageable) {
+
+        return new PaginationResponse<>(postRepository.findAll(pageable)
+                .map(post -> new PostResponse(
+                                post.getPostId(),
+                                post.getContent(),
+                                post.getUsername(),
+                                post.getCreatedAt(),
+                                post.getUpdatedAt()
+                        )
+                )
+        );
+    }
+
 }

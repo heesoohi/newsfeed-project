@@ -25,7 +25,8 @@ public class JwtFilter implements Filter {
             },
             "GET", new String[]{
                     "/users/**",
-                    "/posts/**"
+                    "/posts/**",
+                    "/posts"
             }
     );
 
