@@ -6,11 +6,13 @@ import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.user.dto.request.UserPasswordUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
+import com.example.newsfeedproject.domain.user.dto.request.UserWithdrawRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserFindByEmailResponse;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
 import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,5 +79,22 @@ public class UserService {
         }
 
         user.upadtePassword(passwordEncoder.encode(dto.getNewPassword()));
+    }
+
+    @Transactional
+    public void withdraw(AuthUser authUser, @Valid UserWithdrawRequest dto) {
+        User user = userRepository.findById(authUser.getUserId()).orElseThrow(
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
+        );
+
+        if (user.getDeletedAt() != null) {
+            throw new CustomException(ExceptionType.ALREADY_DELETED_USER);
+        }
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new CustomException(ExceptionType.INVALID_PASSWORD);
+        }
+
+        user.delete();
     }
 }

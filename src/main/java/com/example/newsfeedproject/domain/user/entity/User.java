@@ -64,6 +64,7 @@ public class User extends BaseTimeEntity {
     public void upadtePassword(String newPassword) {
         this.password = newPassword;
     }
+
 //
 //    @Builder
 //    public User(String email, String username, String password) {

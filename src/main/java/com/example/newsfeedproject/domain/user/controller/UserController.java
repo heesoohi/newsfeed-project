@@ -4,6 +4,7 @@ import com.example.newsfeedproject.common.annotation.Auth;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.user.dto.request.UserPasswordUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
+import com.example.newsfeedproject.domain.user.dto.request.UserWithdrawRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
 import com.example.newsfeedproject.domain.user.service.UserService;
 import jakarta.validation.Valid;
@@ -40,6 +41,15 @@ public class UserController {
             @Valid @RequestBody UserPasswordUpdateRequest dto
     ) {
         userService.updatePassword(authUser, dto);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/users/withdraw")
+    public ResponseEntity<Void> withdrawUser (
+            @Auth AuthUser authUser,
+            @Valid @RequestBody UserWithdrawRequest dto
+    ) {
+        userService.withdraw(authUser, dto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
