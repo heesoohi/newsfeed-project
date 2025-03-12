@@ -4,11 +4,13 @@ import com.example.newsfeedproject.common.annotation.Auth;
 import com.example.newsfeedproject.common.pagination.PaginationResponse;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.post.dto.PostResponse;
-import com.example.newsfeedproject.domain.post.dto.PostSaveRequest;
+import com.example.newsfeedproject.domain.post.dto.PostRequest;
 import com.example.newsfeedproject.domain.post.dto.PostSaveResponse;
 import com.example.newsfeedproject.domain.post.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +23,7 @@ public class PostController {
     @PostMapping("/posts")
     public ResponseEntity<PostSaveResponse> savePost(
             @Auth AuthUser authUser,
-            @RequestBody PostSaveRequest dto
+            @Valid @RequestBody PostRequest dto
             ) {
         return ResponseEntity.ok(postService.savePost(authUser, dto));
     }
@@ -34,5 +36,15 @@ public class PostController {
     @GetMapping("/posts")
     public ResponseEntity<PaginationResponse<PostResponse>> getAll(Pageable pageable) {
         return ResponseEntity.ok(postService.getAll(pageable));
+    }
+
+    @PutMapping("/posts/{postId}")
+    public ResponseEntity<Void> updatePost(
+            @Auth AuthUser authUser,
+            @PathVariable Long postId,
+            @Valid @RequestBody PostRequest dto
+    ) {
+        postService.updatePost(authUser, postId, dto);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

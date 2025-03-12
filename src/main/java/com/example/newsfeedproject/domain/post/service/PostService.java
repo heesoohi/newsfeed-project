@@ -5,21 +5,18 @@ import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.common.pagination.PaginationResponse;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.post.dto.PostResponse;
-import com.example.newsfeedproject.domain.post.dto.PostSaveRequest;
+import com.example.newsfeedproject.domain.post.dto.PostRequest;
 import com.example.newsfeedproject.domain.post.dto.PostSaveResponse;
 import com.example.newsfeedproject.domain.post.entity.Post;
 import com.example.newsfeedproject.domain.post.repository.PostRepository;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +26,7 @@ public class PostService {
     private final UserRepository userRepository;
 
     @Transactional
-    public PostSaveResponse savePost(AuthUser authUser, PostSaveRequest dto) {
+    public PostSaveResponse savePost(AuthUser authUser, PostRequest dto) {
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(
                 () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
         );
@@ -66,4 +63,16 @@ public class PostService {
         );
     }
 
+    @Transactional
+    public void updatePost(AuthUser authUser, Long postId, PostRequest dto) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
+        );
+
+        if (!authUser.getUserId().equals(post.getUserId(postId))) {
+            throw new CustomException(ExceptionType.NO_PERMISSION_ACTION);
+        }
+
+        post.update(dto.getContent());
+    }
 }
