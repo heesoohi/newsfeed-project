@@ -34,5 +34,4 @@ public class FollowController {
         followService.unfollow(authUser, targetUserId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

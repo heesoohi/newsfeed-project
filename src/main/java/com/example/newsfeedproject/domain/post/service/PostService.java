@@ -4,8 +4,6 @@ import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.common.pagination.PaginationResponse;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
-import com.example.newsfeedproject.domain.follow.entity.Follow;
-import com.example.newsfeedproject.domain.follow.repository.FollowRepository;
 import com.example.newsfeedproject.domain.post.dto.PostResponse;
 import com.example.newsfeedproject.domain.post.dto.PostRequest;
 import com.example.newsfeedproject.domain.post.dto.PostSaveResponse;
@@ -21,7 +19,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +74,29 @@ public class PostService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public PaginationResponse<PostResponse> searchPosts(
+            Pageable pageable, String sort, LocalDateTime startDate, LocalDateTime endDate
+    ) {
+        Sort sortOption = Sort.by(Sort.Order.desc("createdAt"));
+
+        if ("updatedAt".equals(sort)) {
+            sortOption = Sort.by(Sort.Order.desc("updatedAt"));
+        }
+
+        Pageable tenPostsPerPage = PageRequest.of(pageable.getPageNumber(), 10, sortOption);
+
+        Page<Post> posts = Optional.ofNullable(startDate)
+                .map(start -> Optional.ofNullable(endDate)
+                        .map(end -> postRepository.findByCreatedAtBetween(start, end, tenPostsPerPage))
+                        .orElse(postRepository.findByCreatedAtAfter(start, tenPostsPerPage)))
+                .orElse(Optional.ofNullable(endDate)
+                        .map(end -> postRepository.findByCreatedAtBefore(end, tenPostsPerPage))
+                        .orElse(postRepository.findAll(tenPostsPerPage)));
+
+        return new PaginationResponse<>(posts.map(post -> new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt())));
+    }
+
     @Transactional
     public void updatePost(AuthUser authUser, Long postId, PostRequest dto) {
         Post post = postRepository.findById(postId).orElseThrow(
@@ -100,23 +122,6 @@ public class PostService {
 
         post.delete();
     }
-
-//    @Transactional(readOnly = true)
-//    public PaginationResponse<PostResponse> getAll(Pageable pageable) {
-//
-//        Pageable tenPostsPerPage = PageRequest.of(pageable.getPageNumber(), 10, Sort.by(Sort.Order.desc("createdAt")));
-//
-//        return new PaginationResponse<>(postRepository.findAll(tenPostsPerPage)
-//                .map(post -> new PostResponse(
-//                                post.getPostId(),
-//                                post.getContent(),
-//                                post.getUsername(),
-//                                post.getCreatedAt(),
-//                                post.getUpdatedAt()
-//                        )
-//                )
-//        );
-//    }
 
     @Transactional(readOnly = true)
     public PaginationResponse<PostResponse> getFollowingPosts(AuthUser authUser, Pageable pageable) {

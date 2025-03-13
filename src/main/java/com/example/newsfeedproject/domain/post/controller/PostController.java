@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequiredArgsConstructor
 public class PostController {
@@ -39,6 +41,16 @@ public class PostController {
             @RequestParam(required = false) String sort
     ) {
         return ResponseEntity.ok(postService.getAll(pageable, sort));
+    }
+
+    @GetMapping("/posts/search")
+    public ResponseEntity<PaginationResponse<PostResponse>> searchPosts(
+            Pageable pageable,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate
+            ) {
+        return ResponseEntity.ok(postService.searchPosts(pageable, sort, startDate, endDate));
     }
 
     @PutMapping("/posts/{postId}")
