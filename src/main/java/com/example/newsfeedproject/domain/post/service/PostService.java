@@ -52,11 +52,18 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PaginationResponse<PostResponse> getAll(Pageable pageable) {
+    public PaginationResponse<PostResponse> getAll(Pageable pageable, String sort) {
 
-        Pageable tenPostsPerPage = PageRequest.of(pageable.getPageNumber(), 10, Sort.by(Sort.Order.desc("createdAt")));
+        Sort sortOption = Sort.by(Sort.Order.desc("createdAt"));
 
-        return new PaginationResponse<>(postRepository.findAll(tenPostsPerPage)
+        if ("updatedAt".equals(sort)) {
+            sortOption = Sort.by(Sort.Order.desc("updatedAt"));
+        }
+
+        Pageable tenPostsPerPage = PageRequest.of(pageable.getPageNumber(), 10, sortOption);
+
+        return new PaginationResponse<>(
+                postRepository.findAll(tenPostsPerPage)
                 .map(post -> new PostResponse(
                                 post.getPostId(),
                                 post.getContent(),

@@ -35,9 +35,10 @@ public class PostController {
 
     @GetMapping("/posts")
     public ResponseEntity<PaginationResponse<PostResponse>> getAll(
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) String sort
     ) {
-        return ResponseEntity.ok(postService.getAll(pageable));
+        return ResponseEntity.ok(postService.getAll(pageable, sort));
     }
 
     @PutMapping("/posts/{postId}")
