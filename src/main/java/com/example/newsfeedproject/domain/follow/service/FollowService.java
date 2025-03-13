@@ -33,6 +33,8 @@ public class FollowService {
 
         followRepository.save(new Follow(fromUser, toUser));
 
+        fromUser.increaseFollowingCount();
+        toUser.increaseFollwerCount();
     }
 
     @Transactional
@@ -51,5 +53,8 @@ public class FollowService {
         );
 
         followRepository.delete(follow);
+
+        fromUser.decreaseFollowingCount();
+        toUser.decreaseFollowerCount();
     }
 }
