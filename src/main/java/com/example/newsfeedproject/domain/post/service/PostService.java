@@ -4,6 +4,8 @@ import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.common.pagination.PaginationResponse;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
+import com.example.newsfeedproject.domain.follow.entity.Follow;
+import com.example.newsfeedproject.domain.follow.repository.FollowRepository;
 import com.example.newsfeedproject.domain.post.dto.PostResponse;
 import com.example.newsfeedproject.domain.post.dto.PostRequest;
 import com.example.newsfeedproject.domain.post.dto.PostSaveResponse;
@@ -12,11 +14,14 @@ import com.example.newsfeedproject.domain.post.repository.PostRepository;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -87,5 +92,34 @@ public class PostService {
         }
 
         post.delete();
+    }
+
+//    @Transactional(readOnly = true)
+//    public PaginationResponse<PostResponse> getAll(Pageable pageable) {
+//
+//        Pageable tenPostsPerPage = PageRequest.of(pageable.getPageNumber(), 10, Sort.by(Sort.Order.desc("createdAt")));
+//
+//        return new PaginationResponse<>(postRepository.findAll(tenPostsPerPage)
+//                .map(post -> new PostResponse(
+//                                post.getPostId(),
+//                                post.getContent(),
+//                                post.getUsername(),
+//                                post.getCreatedAt(),
+//                                post.getUpdatedAt()
+//                        )
+//                )
+//        );
+//    }
+
+    @Transactional(readOnly = true)
+    public PaginationResponse<PostResponse> getFollowingPosts(AuthUser authUser, Pageable pageable) {
+
+        User fromUser = userRepository.findById(authUser.getUserId()).orElseThrow(
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
+        );
+
+        Page<Post> posts = postRepository.findAllByFromUser(fromUser, pageable);
+
+        return new PaginationResponse<>(posts.map(post -> new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt())));
     }
 }

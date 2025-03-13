@@ -34,7 +34,9 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<PaginationResponse<PostResponse>> getAll(Pageable pageable) {
+    public ResponseEntity<PaginationResponse<PostResponse>> getAll(
+            Pageable pageable
+    ) {
         return ResponseEntity.ok(postService.getAll(pageable));
     }
 
@@ -55,5 +57,13 @@ public class PostController {
     ) {
         postService.deletePost(authUser, postId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/posts/following")
+    public ResponseEntity<PaginationResponse<PostResponse>> getFollowingPosts(
+            @Auth AuthUser authUser,
+            Pageable pageable
+    ){
+        return ResponseEntity.ok(postService.getFollowingPosts(authUser, pageable));
     }
 }
