@@ -34,4 +34,22 @@ public class FollowService {
         followRepository.save(new Follow(fromUser, toUser));
 
     }
+
+    @Transactional
+    public void unfollow(AuthUser authUser, Long targetUserId) {
+
+        User fromUser = userRepository.findById(authUser.getUserId()).orElseThrow(
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
+        );
+
+        User toUser = userRepository.findById(targetUserId).orElseThrow(
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
+        );
+
+        Follow follow = followRepository.findByFromUserAndToUser(fromUser, toUser).orElseThrow(
+                (() -> new CustomException(ExceptionType.ALREADY_UNFOLLOWED))
+        );
+
+        followRepository.delete(follow);
+    }
 }

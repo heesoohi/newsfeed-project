@@ -17,7 +17,8 @@ public enum ExceptionType {
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
     SAME_AS_OLD_PASSWORD(CONFLICT, "기존 비밀번호와 새 비밀번호가 같으면 안 됩니다."),
     ALREADY_DELETED_USER(UNAUTHORIZED, "이미 탈퇴한 사용자입니다."),
-    NO_PERMISSION_ACTION(HttpStatus.FORBIDDEN, "권한이 없는 작업입니다.");
+    NO_PERMISSION_ACTION(HttpStatus.FORBIDDEN, "권한이 없는 작업입니다."),
+    ALREADY_UNFOLLOWED(HttpStatus.NO_CONTENT, "요청이 정상적으로 처리되었지만, 해당 유저는 이미 팔로우 상태가 아닙니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
