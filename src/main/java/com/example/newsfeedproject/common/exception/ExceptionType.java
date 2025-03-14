@@ -20,7 +20,9 @@ public enum ExceptionType {
     SAME_AS_OLD_PASSWORD(CONFLICT, "기존 비밀번호와 새 비밀번호가 같으면 안 됩니다."),
     ALREADY_DELETED_USER(UNAUTHORIZED, "이미 탈퇴한 사용자입니다."),
     NO_PERMISSION_ACTION(HttpStatus.FORBIDDEN, "권한이 없는 작업입니다."),
-    ALREADY_UNFOLLOWED(HttpStatus.NO_CONTENT, "요청이 정상적으로 처리되었지만, 해당 유저는 이미 팔로우 상태가 아닙니다.");
+    ALREADY_UNFOLLOWED(HttpStatus.NO_CONTENT, "요청이 정상적으로 처리되었지만, 해당 유저는 이미 팔로우 상태가 아닙니다."),
+    SELF_LIKE_NOT_ALLOWED(HttpStatus.FORBIDDEN, "본인의 게시글과 댓글에 좋아요를 남길 수 없습니다."),
+    ALREADY_LIKED(HttpStatus.FORBIDDEN, "같은 게시글에 사용자 당 한 번의 좋아요만 남길 수 있습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
