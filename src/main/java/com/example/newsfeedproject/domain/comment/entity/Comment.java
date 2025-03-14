@@ -46,4 +46,12 @@ public class Comment extends BaseTimeEntity {
         }
     }
 
+    public Long getPostId(Comment comment) {
+        return comment.getPost().getPostId();
+    }
+
+    public String getUsername(Comment comment) {
+        return comment.getUser().getUsername();
+    }
+
 }

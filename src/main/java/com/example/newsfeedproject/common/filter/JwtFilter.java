@@ -27,7 +27,8 @@ public class JwtFilter implements Filter {
                     "/users/**",
                     "/posts/{id:\\d+}",
                     "/posts",
-                    "/posts/search"
+                    "/posts/search",
+                    "/posts/*/comments"
             }
     );
 
@@ -59,6 +60,8 @@ public class JwtFilter implements Filter {
 
         if (bearerJwt == null) {
             // 토큰이 없는 경우 400을 반환합니다.
+            System.out.println("Whitelist request passed: " + httpRequest.getRequestURI());
+            System.out.println(bearerJwt);
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "JWT 토큰이 필요합니다.");
             return;
         }
@@ -100,6 +103,8 @@ public class JwtFilter implements Filter {
     private boolean isWhitelist(HttpServletRequest request) {
         String method = request.getMethod();
         String path = request.getRequestURI();
+
+        System.out.println("Checking whitelist: method= " + method + "path= "+ path);
 
         if (!WHITELIST.containsKey(method)) {
             return false;
