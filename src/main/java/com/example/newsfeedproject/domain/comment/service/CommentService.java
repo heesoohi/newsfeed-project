@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.domain.comment.service;
 
+import com.example.newsfeedproject.common.annotation.Auth;
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.common.pagination.PaginationResponse;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 @RequiredArgsConstructor
@@ -66,17 +69,25 @@ public class CommentService {
         );
     }
 
-//    public void updateComment(
-//            AuthUser authUser,
-//            Long postId,
-//            Long commentId,
-//            CommentRequest dto
-//    ) {
-//        Post post = postRepository.findById(postId).orElseThrow(
-//                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
-//        );
-//
-//
-//
-//    }
+    @Transactional
+    public void updateComment(
+            @Auth AuthUser authUser,
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody CommentRequest dto
+    ) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+        );
+
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new CustomException(ExceptionType.COMMENT_NOT_FOUND, "Comment not found")
+        );
+
+        if (!authUser.getUserId().equals(comment.getUserId())) {
+            throw new CustomException(ExceptionType.NO_PERMISSION_ACTION, "You do not have permission to update this comment");
+        }
+
+        comment.update(dto.getContent());
+    }
 }

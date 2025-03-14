@@ -4,6 +4,8 @@ import com.example.newsfeedproject.common.entity.BaseTimeEntity;
 import com.example.newsfeedproject.domain.post.entity.Post;
 import com.example.newsfeedproject.domain.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -54,4 +56,11 @@ public class Comment extends BaseTimeEntity {
         return comment.getUser().getUsername();
     }
 
+    public Long getUserId() {
+        return user.getUserId();
+    }
+
+    public void update(String content) {
+        this.content = content;
+    }
 }

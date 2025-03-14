@@ -37,14 +37,14 @@ public class CommentController {
         return ResponseEntity.ok(commentService.findAll(pageable, postId));
     }
 
-//    @PutMapping("/posts/{postId}/comments/{commentId}")
-//    public ResponseEntity<Void> updateComment(
-//            @Auth AuthUser authUser,
-//            @PathVariable Long postId,
-//            @PathVariable Long commentId,
-//            @Valid @RequestBody CommentRequest dto
-//    ) {
-//        commentService.updateComment(authUser, postId, commentId, dto);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
+    @PutMapping("/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> updateComment(
+            @Auth AuthUser authUser,
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody CommentRequest dto
+    ) {
+        commentService.updateComment(authUser, postId, commentId, dto);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
