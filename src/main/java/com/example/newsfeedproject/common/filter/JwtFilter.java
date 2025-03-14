@@ -25,7 +25,7 @@ public class JwtFilter implements Filter {
             },
             "GET", new String[]{
                     "/users/**",
-                    "/posts/{id:\\d+}",
+                    "/posts/*",
                     "/posts",
                     "/posts/search",
                     "/posts/*/comments"
@@ -44,40 +44,40 @@ public class JwtFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        log.info("Request URI: {}, Method: {}", httpRequest.getRequestURI(), httpRequest.getMethod());
+
         if (isWhitelist(httpRequest)) {
+            log.info("Whitelisted request, skipping JWT validation");
             chain.doFilter(request, response);
             return;
         }
 
-//        String url = httpRequest.getRequestURI();
-//
-//        if (url.startsWith("/auth")) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
-
         String bearerJwt = httpRequest.getHeader("Authorization");
+        log.info("Authorization Header: {}", bearerJwt);
 
         if (bearerJwt == null) {
             // 토큰이 없는 경우 400을 반환합니다.
-            System.out.println("Whitelist request passed: " + httpRequest.getRequestURI());
-            System.out.println(bearerJwt);
+            log.warn("No JWT token provided for secured endpoint");
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "JWT 토큰이 필요합니다.");
             return;
         }
 
         String jwt = jwtUtil.substringToken(bearerJwt);
+        log.info("Extracted JWT: {}", jwt);
 
         try {
             // JWT 유효성 검사와 claims 추출
             Claims claims = jwtUtil.extractClaims(jwt);
             if (claims == null) {
+                log.warn("Claims extraction failed");
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 JWT 토큰입니다.");
                 return;
             }
+            log.info("Claims: {}", claims);
 
             httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
             httpRequest.setAttribute("email", claims.get("email"));
+            log.info("Set userId: {}, email: {}", claims.getSubject(), claims.get("email"));
 
             chain.doFilter(request, response);
         } catch (SecurityException | MalformedJwtException e) {
@@ -104,13 +104,15 @@ public class JwtFilter implements Filter {
         String method = request.getMethod();
         String path = request.getRequestURI();
 
-        System.out.println("Checking whitelist: method= " + method + "path= "+ path);
+        log.info("Checking whitelist: method={}, path={}", method, path);
 
         if (!WHITELIST.containsKey(method)) {
             return false;
         }
 
         String[] lists = WHITELIST.get(method);
-        return PatternMatchUtils.simpleMatch(lists, path);
+        boolean isWhitelisted = PatternMatchUtils.simpleMatch(lists, path);
+        log.info("Whitelist result: {}", isWhitelisted);
+        return isWhitelisted;
     }
 }

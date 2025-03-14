@@ -72,7 +72,7 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/posts/following")
+    @GetMapping("/posts-following")
     public ResponseEntity<PaginationResponse<PostResponse>> getFollowingPosts(
             @Auth AuthUser authUser,
             Pageable pageable

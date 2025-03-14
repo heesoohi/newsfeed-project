@@ -9,6 +9,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @Getter
 public enum ExceptionType {
 
+    AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "유저 인증 정보를 찾을 수 없습니다."),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "요청값 검증에 실패했습니다."),
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "해당 이메일로 가입한 계정이 존재합니다."),
     INVALID_EMAIL(HttpStatus.BAD_REQUEST, "해당 이메일로 등록된 계정을 찾을 수 없습니다."),

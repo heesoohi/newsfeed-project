@@ -129,6 +129,10 @@ public class PostService {
     @Transactional(readOnly = true)
     public PaginationResponse<PostResponse> getFollowingPosts(AuthUser authUser, Pageable pageable) {
 
+        if (authUser == null || authUser.getUserId() == null) {
+            throw new CustomException(ExceptionType.AUTHENTICATION_FAILED);
+        }
+
         User fromUser = userRepository.findById(authUser.getUserId()).orElseThrow(
                 () -> new CustomException(ExceptionType.USER_NOT_FOUND)
         );
