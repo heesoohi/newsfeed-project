@@ -7,7 +7,6 @@ import com.example.newsfeedproject.domain.comment.entity.Comment;
 import com.example.newsfeedproject.domain.comment.repository.CommentRepository;
 import com.example.newsfeedproject.domain.like.comment.entity.CommentLike;
 import com.example.newsfeedproject.domain.like.comment.repository.CommentLikeRepository;
-import com.example.newsfeedproject.domain.like.post.entity.PostLike;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +45,23 @@ public class CommentLikeService {
 
         CommentLike commentLike = new CommentLike(comment, user);
         commentLikeRepository.save(commentLike);
+    }
+
+    @Transactional
+    public void unlikeComment(AuthUser authUser, Long postId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new CustomException(ExceptionType.COMMENT_NOT_FOUND)
+        );
+
+        User user = userRepository.findById(authUser.getUserId()).orElseThrow(
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
+        );
+
+        Optional<CommentLike> existingLike = commentLikeRepository.findByCommentAndUser(comment, user);
+        if (existingLike.isEmpty()) {
+            throw new CustomException(ExceptionType.LIKE_NOT_FOUND);
+        }
+
+        commentLikeRepository.delete(existingLike.get());
     }
 }

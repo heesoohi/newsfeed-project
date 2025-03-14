@@ -6,6 +6,7 @@ import com.example.newsfeedproject.domain.like.comment.service.CommentLikeServic
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,16 @@ public class CommentLikeController {
             @PathVariable Long commentId
     ) {
         commentLikeService.likeComment(authUser, postId, commentId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/posts/{postId}/comments/{commentId}/like")
+    public ResponseEntity<Void> unlikeComment(
+            @Auth AuthUser authUser,
+            @PathVariable Long postId,
+            @PathVariable Long commentId
+    ) {
+        commentLikeService.unlikeComment(authUser, postId, commentId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
