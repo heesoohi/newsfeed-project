@@ -1,0 +1,118 @@
+package com.example.newsfeedproject.common.filter;
+
+import com.example.newsfeedproject.common.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.PatternMatchUtils;
+
+import java.io.IOException;
+import java.util.Map;
+
+@Slf4j
+@RequiredArgsConstructor
+public class JwtFilter implements Filter {
+
+    private static final Map<String, String[]> WHITELIST = Map.of(
+            "POST", new String[]{
+                    "/auth/**"
+            },
+            "GET", new String[]{
+                    "/users/**",
+                    "/posts/*",
+                    "/posts",
+                    "/posts/search",
+                    "/posts/*/comments"
+            }
+    );
+
+    private final JwtUtil jwtUtil;
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        Filter.super.init(filterConfig);
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+        log.info("Request URI: {}, Method: {}", httpRequest.getRequestURI(), httpRequest.getMethod());
+
+        if (isWhitelist(httpRequest)) {
+            log.info("Whitelisted request, skipping JWT validation");
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String bearerJwt = httpRequest.getHeader("Authorization");
+        log.info("Authorization Header: {}", bearerJwt);
+
+        if (bearerJwt == null) {
+            // 토큰이 없는 경우 400을 반환합니다.
+            log.warn("No JWT token provided for secured endpoint");
+            httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "JWT 토큰이 필요합니다.");
+            return;
+        }
+
+        String jwt = jwtUtil.substringToken(bearerJwt);
+        log.info("Extracted JWT: {}", jwt);
+
+        try {
+            // JWT 유효성 검사와 claims 추출
+            Claims claims = jwtUtil.extractClaims(jwt);
+            if (claims == null) {
+                log.warn("Claims extraction failed");
+                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 JWT 토큰입니다.");
+                return;
+            }
+            log.info("Claims: {}", claims);
+
+            httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
+            httpRequest.setAttribute("email", claims.get("email"));
+            log.info("Set userId: {}, email: {}", claims.getSubject(), claims.get("email"));
+
+            chain.doFilter(request, response);
+        } catch (SecurityException | MalformedJwtException e) {
+            log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token, 만료된 JWT token 입니다.", e);
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
+            httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원되지 않는 JWT 토큰입니다.");
+        } catch (Exception e) {
+            log.error("Invalid JWT token, 유효하지 않는 JWT 토큰 입니다.", e);
+            httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않는 JWT 토큰입니다.");
+        }
+    }
+
+    @Override
+    public void destroy() {
+        Filter.super.destroy();
+    }
+
+    private boolean isWhitelist(HttpServletRequest request) {
+        String method = request.getMethod();
+        String path = request.getRequestURI();
+
+        log.info("Checking whitelist: method={}, path={}", method, path);
+
+        if (!WHITELIST.containsKey(method)) {
+            return false;
+        }
+
+        String[] lists = WHITELIST.get(method);
+        boolean isWhitelisted = PatternMatchUtils.simpleMatch(lists, path);
+        log.info("Whitelist result: {}", isWhitelisted);
+        return isWhitelisted;
+    }
+}
