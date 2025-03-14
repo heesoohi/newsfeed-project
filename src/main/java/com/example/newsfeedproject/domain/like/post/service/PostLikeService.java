@@ -45,6 +45,7 @@ public class PostLikeService {
 
         PostLike postLike = new PostLike(post, user);
         postLikeRepository.save(postLike);
+        post.incrementLikeCount();
     }
 
     @Transactional
@@ -63,5 +64,6 @@ public class PostLikeService {
         }
 
         postLikeRepository.delete(existingPostLike.get());
+        post.decrementLikeCount();
     }
 }

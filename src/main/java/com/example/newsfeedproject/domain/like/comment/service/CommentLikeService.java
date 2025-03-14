@@ -45,6 +45,7 @@ public class CommentLikeService {
 
         CommentLike commentLike = new CommentLike(comment, user);
         commentLikeRepository.save(commentLike);
+        comment.incrementLikeCount();
     }
 
     @Transactional
@@ -63,5 +64,6 @@ public class CommentLikeService {
         }
 
         commentLikeRepository.delete(existingLike.get());
+        comment.decrementLikeCount();
     }
 }
