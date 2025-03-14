@@ -103,7 +103,7 @@ public class PostService {
                 () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
-        if (!authUser.getUserId().equals(post.getUserId(postId))) {
+        if (!authUser.getUserId().equals(post.getUserId())) {
             throw new CustomException(ExceptionType.NO_PERMISSION_ACTION);
         }
 
@@ -116,7 +116,7 @@ public class PostService {
                 () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
-        if (!authUser.getUserId().equals(post.getUserId(postId))) {
+        if (!authUser.getUserId().equals(post.getUserId())) {
             throw new CustomException(ExceptionType.NO_PERMISSION_ACTION);
         }
 

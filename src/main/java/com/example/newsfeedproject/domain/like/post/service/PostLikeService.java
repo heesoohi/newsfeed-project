@@ -34,7 +34,7 @@ public class PostLikeService {
                 () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
         );
 
-        if(user.getUserId().equals(post.getUserId(postId))) {
+        if(user.getUserId().equals(post.getUserId())) {
             throw new CustomException(ExceptionType.SELF_LIKE_NOT_ALLOWED, "Self like not allowed");
         }
 
@@ -47,10 +47,21 @@ public class PostLikeService {
         postLikeRepository.save(postLike);
     }
 
+    @Transactional
+    public void unlikePost(AuthUser authUser, Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+        );
 
-//    Optional<PostLike> existingPostLike = postLikeRepository.findByPostAndUser(post, user);
-//        if (existingPostLike.isPresent()) {
-//        postLikeRepository.delete(existingPostLike.get());
-//        return; // 좋아요 취소
-//    }
+        User user = userRepository.findById(authUser.getUserId()).orElseThrow(
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
+        );
+
+        Optional<PostLike> existingPostLike = postLikeRepository.findByPostAndUser(post, user);
+        if (existingPostLike.isEmpty()) {
+            throw new CustomException(ExceptionType.LIKE_NOT_FOUND, "Like not found");
+        }
+
+        postLikeRepository.delete(existingPostLike.get());
+    }
 }

@@ -49,7 +49,7 @@ public class Post extends BaseTimeEntity {
         this.content = content;
     }
 
-    public Long getUserId(Long postId) {
+    public Long getUserId() {
         return this.user.getUserId();
     }
 }
