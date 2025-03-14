@@ -48,13 +48,13 @@ public class CommentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-//    @DeleteMapping("/posts/{postId}/comments/{commentId}")
-//    public ResponseEntity<Void> deleteComment(
-//            @Auth AuthUser authUser,
-//            @PathVariable Long postId,
-//            @PathVariable Long commentId
-//    ) {
-//        commentService.deleteComment(authUser, postId, commentId);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
+    @DeleteMapping("/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @Auth AuthUser authUser,
+            @PathVariable Long postId,
+            @PathVariable Long commentId
+    ) {
+        commentService.deleteComment(authUser, postId, commentId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

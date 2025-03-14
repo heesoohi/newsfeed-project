@@ -91,6 +91,20 @@ public class CommentService {
         comment.update(dto.getContent());
     }
 
-//    public void deleteComment(AuthUser authUser, Long postId, Long commentId) {
-//    }
+    @Transactional
+    public void deleteComment(AuthUser authUser, Long postId, Long commentId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+        );
+
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new CustomException(ExceptionType.COMMENT_NOT_FOUND, "Comment not found")
+        );
+
+        if (!authUser.getUserId().equals(comment.getUserId())) {
+            throw new CustomException(ExceptionType.NO_PERMISSION_ACTION, "You do not have permission to delete this comment");
+        }
+
+        comment.delete();
+    }
 }
