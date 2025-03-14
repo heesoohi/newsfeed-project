@@ -71,10 +71,10 @@ public class CommentService {
 
     @Transactional
     public void updateComment(
-            @Auth AuthUser authUser,
-            @PathVariable Long postId,
-            @PathVariable Long commentId,
-            @Valid @RequestBody CommentRequest dto
+            AuthUser authUser,
+            Long postId,
+            Long commentId,
+            CommentRequest dto
     ) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
@@ -90,4 +90,7 @@ public class CommentService {
 
         comment.update(dto.getContent());
     }
+
+//    public void deleteComment(AuthUser authUser, Long postId, Long commentId) {
+//    }
 }
