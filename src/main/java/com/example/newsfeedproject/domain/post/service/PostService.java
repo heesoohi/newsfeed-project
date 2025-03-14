@@ -47,7 +47,7 @@ public class PostService {
                 () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
-        return new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt());
+        return new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt(), post.getLikeCount());
     }
 
     @Transactional(readOnly = true)
@@ -57,6 +57,8 @@ public class PostService {
 
         if ("updatedAt".equals(sort)) {
             sortOption = Sort.by(Sort.Order.desc("updatedAt"));
+        } else if ("likeCount".equals(sort)) {
+            sortOption = Sort.by(Sort.Order.desc("likeCount"));
         }
 
         Pageable tenPostsPerPage = PageRequest.of(pageable.getPageNumber(), 10, sortOption);
@@ -68,7 +70,8 @@ public class PostService {
                                 post.getContent(),
                                 post.getUsername(),
                                 post.getCreatedAt(),
-                                post.getUpdatedAt()
+                                post.getUpdatedAt(),
+                                post.getLikeCount()
                         )
                 )
         );
@@ -94,7 +97,7 @@ public class PostService {
                         .map(end -> postRepository.findByCreatedAtBefore(end, tenPostsPerPage))
                         .orElse(postRepository.findAll(tenPostsPerPage)));
 
-        return new PaginationResponse<>(posts.map(post -> new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt())));
+        return new PaginationResponse<>(posts.map(post -> new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt(), post.getLikeCount())));
     }
 
     @Transactional
@@ -132,6 +135,6 @@ public class PostService {
 
         Page<Post> posts = postRepository.findAllByFromUser(fromUser, pageable);
 
-        return new PaginationResponse<>(posts.map(post -> new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt())));
+        return new PaginationResponse<>(posts.map(post -> new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt(), post.getLikeCount())));
     }
 }
