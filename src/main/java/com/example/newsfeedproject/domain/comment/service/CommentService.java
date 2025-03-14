@@ -1,6 +1,5 @@
 package com.example.newsfeedproject.domain.comment.service;
 
-import com.example.newsfeedproject.common.annotation.Auth;
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.common.pagination.PaginationResponse;
@@ -14,14 +13,11 @@ import com.example.newsfeedproject.domain.post.entity.Post;
 import com.example.newsfeedproject.domain.post.repository.PostRepository;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +30,11 @@ public class CommentService {
     @Transactional
     public CommentSaveResponse saveComment(AuthUser authUser, Long postId, CommentRequest dto) {
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(
-                () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
         );
 
         Comment comment = new Comment(post, user, dto.getContent());
@@ -51,7 +47,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public PaginationResponse<CommentResponse> findAll(Pageable pageable, Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
         Pageable tenCommentsPerPage = PageRequest.of(pageable.getPageNumber(), 10);
@@ -77,15 +73,15 @@ public class CommentService {
             CommentRequest dto
     ) {
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new CustomException(ExceptionType.COMMENT_NOT_FOUND, "Comment not found")
+                () -> new CustomException(ExceptionType.COMMENT_NOT_FOUND)
         );
 
         if (!authUser.getUserId().equals(comment.getUserId())) {
-            throw new CustomException(ExceptionType.NO_PERMISSION_ACTION, "You do not have permission to update this comment");
+            throw new CustomException(ExceptionType.NO_PERMISSION_ACTION);
         }
 
         comment.update(dto.getContent());
@@ -94,15 +90,15 @@ public class CommentService {
     @Transactional
     public void deleteComment(AuthUser authUser, Long postId, Long commentId) {
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new CustomException(ExceptionType.COMMENT_NOT_FOUND, "Comment not found")
+                () -> new CustomException(ExceptionType.COMMENT_NOT_FOUND)
         );
 
         if (!authUser.getUserId().equals(comment.getUserId())) {
-            throw new CustomException(ExceptionType.NO_PERMISSION_ACTION, "You do not have permission to delete this comment");
+            throw new CustomException(ExceptionType.NO_PERMISSION_ACTION);
         }
 
         comment.delete();

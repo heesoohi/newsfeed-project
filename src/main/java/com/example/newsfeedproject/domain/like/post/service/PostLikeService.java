@@ -27,20 +27,20 @@ public class PostLikeService {
     public void likePost(AuthUser authUser, Long postId) {
 
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(
-                () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
         );
 
         if(user.getUserId().equals(post.getUserId())) {
-            throw new CustomException(ExceptionType.SELF_LIKE_NOT_ALLOWED, "Self like not allowed");
+            throw new CustomException(ExceptionType.SELF_LIKE_NOT_ALLOWED);
         }
 
         Optional<PostLike> existingPostLike = postLikeRepository.findByPostAndUser(post, user);
         if (existingPostLike.isPresent()) {
-            throw new CustomException(ExceptionType.ALREADY_LIKED, "Post already liked");
+            throw new CustomException(ExceptionType.ALREADY_LIKED);
         }
 
         PostLike postLike = new PostLike(post, user);
@@ -50,16 +50,16 @@ public class PostLikeService {
     @Transactional
     public void unlikePost(AuthUser authUser, Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(
-                () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
         );
 
         Optional<PostLike> existingPostLike = postLikeRepository.findByPostAndUser(post, user);
         if (existingPostLike.isEmpty()) {
-            throw new CustomException(ExceptionType.LIKE_NOT_FOUND, "Like not found");
+            throw new CustomException(ExceptionType.LIKE_NOT_FOUND);
         }
 
         postLikeRepository.delete(existingPostLike.get());

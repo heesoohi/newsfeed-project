@@ -32,7 +32,7 @@ public class PostService {
     @Transactional
     public PostSaveResponse savePost(AuthUser authUser, PostRequest dto) {
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(
-                () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
         );
 
         Post post = new Post(user, dto.getContent());
@@ -44,7 +44,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponse getPost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new CustomException(ExceptionType.POST_NOT_FOUND, "Post not found")
+                () -> new CustomException(ExceptionType.POST_NOT_FOUND)
         );
 
         return new PostResponse(post.getPostId(), post.getContent(), post.getUsername(), post.getCreatedAt(), post.getUpdatedAt());
@@ -127,7 +127,7 @@ public class PostService {
     public PaginationResponse<PostResponse> getFollowingPosts(AuthUser authUser, Pageable pageable) {
 
         User fromUser = userRepository.findById(authUser.getUserId()).orElseThrow(
-                () -> new CustomException(ExceptionType.USER_NOT_FOUND, "User not found")
+                () -> new CustomException(ExceptionType.USER_NOT_FOUND)
         );
 
         Page<Post> posts = postRepository.findAllByFromUser(fromUser, pageable);
