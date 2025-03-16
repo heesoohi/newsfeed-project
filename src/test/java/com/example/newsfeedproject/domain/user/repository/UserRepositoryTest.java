@@ -21,9 +21,12 @@ class UserRepositoryTest {
     private static final String TEST_NAME = "name";
     private static final String TEST_PASSWORD = "password";
 
+    private User testUser;
+
     @BeforeEach
     void setUp() {
-        assertNotNull(userRepository, "UserRepository 가 주입되지 않았습니다.");
+        // 테스트용 사용자 객체를 초기화
+        testUser = new User(TEST_EMAIL, TEST_NAME, TEST_PASSWORD);
     }
 
     @DisplayName("이메일로 사용자를 조회할 수 있다.")
