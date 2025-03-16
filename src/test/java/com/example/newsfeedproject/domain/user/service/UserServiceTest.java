@@ -2,6 +2,7 @@ package com.example.newsfeedproject.domain.user.service;
 
 import com.example.newsfeedproject.common.config.PasswordEncoder;
 import com.example.newsfeedproject.common.exception.CustomException;
+import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
@@ -65,10 +66,13 @@ class UserServiceTest {
         given(userRepository.existsByEmail(email)).willReturn(true);
 
         // when & then
-        assertThrows(CustomException.class,
+        CustomException exception = assertThrows(CustomException.class,
                 () -> userService.save(email, username, encodedPassword),
                 "DUPLICATE_EMAIL expected"
         );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.DUPLICATE_EMAIL);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.BAD_REQUEST);
+        assertThat(exception.getMessage()).isEqualTo("해당 이메일로 가입한 계정이 존재합니다.");
 
         verify(userRepository, times(1)).existsByEmail(email);
     }
