@@ -15,4 +15,8 @@ public class UserWithdrawRequest {
             message = "비밀번호 형식이 올바르지 않습니다."
     )
     private String password;
+
+    public UserWithdrawRequest(String password) {
+        this.password = password;
+    }
 }

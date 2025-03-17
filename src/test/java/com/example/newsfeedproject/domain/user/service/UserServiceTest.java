@@ -6,6 +6,7 @@ import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.user.dto.request.UserPasswordUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
+import com.example.newsfeedproject.domain.user.dto.request.UserWithdrawRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserFindByEmailResponse;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
 import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -344,5 +346,119 @@ class UserServiceTest {
 
         verify(userRepository, times(1)).findById(userId);
         verify(passwordEncoder, times(1)).matches(oldPassword, encodedOldPassword);
+    }
+
+    @DisplayName("유저가 정상적으로 탈퇴된다.")
+    @Test
+    void withdrawSuccess() {
+        // given
+        Long userId = 1L;
+        String email = "test@test.com";
+        String username = "name";
+        String password = "password123!";
+        String encodedPassword = "encodedPassword";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserWithdrawRequest dto = new UserWithdrawRequest(password);
+        User user = mock(User.class);
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(user.getDeletedAt()).willReturn(null);
+        given(user.getPassword()).willReturn(encodedPassword);
+        given(passwordEncoder.matches(password, encodedPassword)).willReturn(true);
+
+        // when
+        userService.withdraw(authUser, dto);
+
+        // then
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordEncoder, times(1)).matches(password, encodedPassword);
+        verify(user, times(1)).delete();
+    }
+
+    @DisplayName("존재하지 않는 유저 ID로 탈퇴 시 USER_NOT_FOUND 예외를 던진다.")
+    @Test
+    void withdrawWithNotFound() {
+        // given
+        Long userId = -1L;
+        String email = "test@test.com";
+        String password = "password123!";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserWithdrawRequest dto = new UserWithdrawRequest(password);
+
+        given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.withdraw(authUser, dto),
+                "USER_NOT_FOUND expected"
+        );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.USER_NOT_FOUND);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.NOT_FOUND);
+        assertThat(exception.getMessage()).isEqualTo("해당 사용자를 찾을 수 없습니다.");
+
+        verify(userRepository, times(1)).findById(userId);
+    }
+
+    @DisplayName("이미 탈퇴한 유저가 탈퇴를 시도하면 ALREADY_DELETED_USER 예외를 던진다.")
+    @Test
+    void withdrawWithAlreadyDeletedUser() {
+        // given
+        Long userId = 1L;
+        String email = "test@test.com";
+        String username = "name";
+        String password = "password123!";
+        String encodedPassword = "encodedPassword";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserWithdrawRequest dto = new UserWithdrawRequest(password);
+
+        User user = mock(User.class);
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(user.getDeletedAt()).willReturn(LocalDateTime.now());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.withdraw(authUser, dto),
+                "ALREADY_DELETED_USER expected"
+        );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.ALREADY_DELETED_USER);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.UNAUTHORIZED);
+        assertThat(exception.getMessage()).isEqualTo("이미 탈퇴한 사용자입니다.");
+
+        verify(userRepository, times(1)).findById(userId);
+    }
+
+    @DisplayName("비밀번호가 일치하지 않을 때 INVALID_PASSWORD 예외를 던진다.")
+    @Test
+    void withdrawWithInvalidPassword() {
+        // given
+        Long userId = 1L;
+        String email = "test@test.com";
+        String username = "name";
+        String password = "wrongPassword123!";
+        String encodedPassword = "encodedPassword";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserWithdrawRequest dto = new UserWithdrawRequest(password);
+
+        User user = mock(User.class);
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(user.getDeletedAt()).willReturn(null);
+        given(user.getPassword()).willReturn(encodedPassword);
+        given(passwordEncoder.matches(password, encodedPassword)).willReturn(false);
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.withdraw(authUser, dto),
+                "INVALID_PASSWORD expected"
+        );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.INVALID_PASSWORD);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.UNAUTHORIZED);
+        assertThat(exception.getMessage()).isEqualTo("입력된 비밀번호가 틀렸습니다.");
+
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordEncoder, times(1)).matches(password, encodedPassword);
     }
 }
