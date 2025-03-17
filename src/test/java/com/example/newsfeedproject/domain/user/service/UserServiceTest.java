@@ -3,6 +3,8 @@ package com.example.newsfeedproject.domain.user.service;
 import com.example.newsfeedproject.common.config.PasswordEncoder;
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
+import com.example.newsfeedproject.domain.auth.dto.AuthUser;
+import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserFindByEmailResponse;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
 import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
@@ -14,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import java.util.Optional;
 
@@ -44,6 +45,7 @@ class UserServiceTest {
         String encodedPassword = "encodedPassword";
         Long saveUserId = 1L;
 
+        User user = new User(email, username, encodedPassword);
         User savedUser = mock(User.class);
         given(savedUser.getUserId()).willReturn(saveUserId);
         given(userRepository.existsByEmail(email)).willReturn(false);
@@ -86,14 +88,15 @@ class UserServiceTest {
     @Test
     void findByEmailSuccess() {
         // given
-        String email = "test@test.com";
         Long userId = 1L;
+        String email = "test@test.com";
         String encodedPassword = "encodedPassword";
 
         User user = mock(User.class);
         given(user.getUserId()).willReturn(userId);
         given(user.getEmail()).willReturn(email);
         given(user.getPassword()).willReturn(encodedPassword);
+
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
 
         // when
@@ -178,4 +181,50 @@ class UserServiceTest {
         verify(userRepository, times(1)).findById(userId);
     }
 
+    @DisplayName("유저 정보가 정상적으로 업데이트된다.")
+    @Test
+    void updateUserSuccess() {
+        // given
+        Long userId = 1L;
+        String email = "test@test.com";
+        String initialUsername = "oldName";
+        String newUsername = "newName";
+        String encodedPassword = "encodedPassword";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserUpdateRequest dto = new UserUpdateRequest(newUsername);
+        User user = new User(email, initialUsername, encodedPassword);
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+
+        // when
+        userService.updateUser(authUser, dto);
+
+        // then
+        assertThat(user.getUsername()).isEqualTo(newUsername);
+        verify(userRepository, times(1)).findById(userId);
+    }
+
+    @DisplayName("존재하지 않는 유저 ID로 업데이트 시 USER_NOT_FOUND 예외를 던진다.")
+    @Test
+    void updateUserWithNotFound() {
+        // given
+        Long userId = -1L;
+        String email = "test@test.com";
+        String newUsername = "newName";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserUpdateRequest dto = new UserUpdateRequest(newUsername);
+        given(userRepository.findById(userId)).willReturn(Optional.empty());
+        
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.updateUser(authUser, dto),
+                "USER_NOT_FOUND expected"
+        );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.USER_NOT_FOUND);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.NOT_FOUND);
+        assertThat(exception.getMessage()).isEqualTo("해당 사용자를 찾을 수 없습니다.");
+
+        verify(userRepository, times(1)).findById(userId);
+    }
 }
