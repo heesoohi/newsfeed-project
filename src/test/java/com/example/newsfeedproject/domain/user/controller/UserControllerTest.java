@@ -3,6 +3,7 @@ package com.example.newsfeedproject.domain.user.controller;
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
+import com.example.newsfeedproject.domain.user.dto.request.UserPasswordUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
 import com.example.newsfeedproject.domain.user.service.UserService;
@@ -117,6 +118,53 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .requestAttr("authUser", authUser))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @DisplayName("비밀번호 수정 성공")
+    @Test
+    void updatePasswordSuccess() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserPasswordUpdateRequest dto = new UserPasswordUpdateRequest("oldPass123!", "newPass123!");
+        doNothing().when(userService).updatePassword(any(AuthUser.class), any(UserPasswordUpdateRequest.class));
+
+        // when & then
+        mockMvc.perform(put("/users/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .requestAttr("authUser", authUser))
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("비밀번호 수정 실패 - 유효하지 않은 요청")
+    @Test
+    void updatePasswordInvalidRequest() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserPasswordUpdateRequest invalidDto = new UserPasswordUpdateRequest("oldPass123!", "");
+
+        // when & then
+        mockMvc.perform(put("/users/password")
+        .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDto))
+                .requestAttr("authUser", authUser))
+                .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("비밀번호 수정 실패 - 권한 없음")
+    @Test
+    void updatePasswordUnauthorized() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserPasswordUpdateRequest dto = new UserPasswordUpdateRequest("oldPass123!", "newPass123!");
+        doThrow(new CustomException(ExceptionType.AUTHENTICATION_FAILED)).when(userService).updatePassword(any(AuthUser.class), any(UserPasswordUpdateRequest.class));
+
+        // when & then
+        mockMvc.perform(put("/users/password")
+        .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .requestAttr("authUser", authUser))
                 .andExpect(status().isUnauthorized());
     }
 }
