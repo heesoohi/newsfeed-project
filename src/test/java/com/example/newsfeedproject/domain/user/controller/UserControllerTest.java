@@ -2,21 +2,29 @@ package com.example.newsfeedproject.domain.user.controller;
 
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
+import com.example.newsfeedproject.domain.auth.dto.AuthUser;
+import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
 import com.example.newsfeedproject.domain.user.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
 
 @MockBean(JpaMetamodelMappingContext.class)
 @WebMvcTest(UserController.class)
@@ -27,6 +35,9 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @DisplayName("User 단건 조회 성공")
     @Test
@@ -60,5 +71,52 @@ class UserControllerTest {
         // when & then
         mockMvc.perform(get("/users/{userId}", userId))
                 .andExpect(status().isNotFound());
+    }
+
+    @DisplayName("본인 프로필 수정 성공")
+    @Test
+    void updateUserSuccess() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserUpdateRequest dto = new UserUpdateRequest("newName");
+        doNothing().when(userService).updateUser(any(AuthUser.class), any(UserUpdateRequest.class));
+
+        // when & then
+        mockMvc.perform(put("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .requestAttr("authUser", authUser)) // @Auth 로 주입되는 객체를 MockMvc 에 설정
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("본인 프로필 수정 실패 - 유효하지 않은 요청")
+    @Test
+    void updateUserInvalidRequest() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserUpdateRequest invalidDto = new UserUpdateRequest("");
+
+        // when & then
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidDto))
+                        .requestAttr("authUser", authUser))
+                .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("본인 프로필 수정 실패 - 권한 없음")
+    @Test
+    void updateUserUnauthorized() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserUpdateRequest dto = new UserUpdateRequest("newName");
+        doThrow(new CustomException(ExceptionType.AUTHENTICATION_FAILED)).when(userService).updateUser(any(AuthUser.class), any(UserUpdateRequest.class));
+
+        // when & then
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .requestAttr("authUser", authUser))
+                .andExpect(status().isUnauthorized());
     }
 }
