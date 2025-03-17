@@ -4,6 +4,7 @@ import com.example.newsfeedproject.common.config.PasswordEncoder;
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
+import com.example.newsfeedproject.domain.user.dto.request.UserPasswordUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserFindByEmailResponse;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
@@ -226,5 +227,122 @@ class UserServiceTest {
         assertThat(exception.getMessage()).isEqualTo("해당 사용자를 찾을 수 없습니다.");
 
         verify(userRepository, times(1)).findById(userId);
+    }
+
+    @DisplayName("비밀번호가 정상적으로 업데이트된다.")
+    @Test
+    void updatePasswordSuccess() {
+        // given
+        Long userId = 1L;
+        String email = "test@test.com";
+        String username = "name";
+        String oldPassword = "oldPassword123!";
+        String encodedOldPassword = "encodedOldPassword";
+        String newPassword = "newPassword123!";
+        String encodedNewPassword = "encodedNewPassword";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserPasswordUpdateRequest dto = new UserPasswordUpdateRequest(oldPassword, newPassword);
+        User user = new User(email, username, encodedOldPassword);
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(oldPassword, encodedOldPassword)).willReturn(true);
+        given(passwordEncoder.encode(newPassword)).willReturn(encodedNewPassword);
+
+        // when
+        userService.updatePassword(authUser, dto);
+
+        // then
+        assertThat(user.getPassword()).isEqualTo(encodedNewPassword);
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordEncoder, times(1)).matches(oldPassword, encodedOldPassword);
+        verify(passwordEncoder, times(1)).encode(newPassword);
+    }
+
+    @DisplayName("존재하지 않는 유저 ID로 비밀번호 업데이트 시, USER_NOT_FOUND 예외를 던진다.")
+    @Test
+    void updatePasswordWithNotFound() {
+        // given
+        Long userId = -1L;
+        String email = "test@test.com";
+        String oldPassword = "oldPassword123!";
+        String newPassword = "newPassword123!";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserPasswordUpdateRequest dto = new UserPasswordUpdateRequest(oldPassword, newPassword);
+
+        given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.updatePassword(authUser, dto),
+                "USER_NOT_FOUND expected"
+        );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.USER_NOT_FOUND);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.NOT_FOUND);
+        assertThat(exception.getMessage()).isEqualTo("해당 사용자를 찾을 수 없습니다.");
+
+        verify(userRepository, times(1)).findById(userId);
+    }
+
+    @DisplayName("이전 비밀번호가 일치하지 않을 때 INVALID_PASSWORD 예외를 던진다.")
+    @Test
+    void updatePasswordWithInvalidOldPassword() {
+        // given
+        Long userId = 1L;
+        String email = "test@test.com";
+        String username = "name";
+        String oldPassword = "wrongPassword123!";
+        String encodedOldPassword = "encodedOldPassword";
+        String newPassword = "newPassword123!";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserPasswordUpdateRequest dto = new UserPasswordUpdateRequest(oldPassword, newPassword);
+        User user = new User(email, username, encodedOldPassword);
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(oldPassword, encodedOldPassword)).willReturn(false);
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.updatePassword(authUser, dto),
+                "INVALID_PASSWORD expected"
+        );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.INVALID_PASSWORD);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.UNAUTHORIZED);
+        assertThat(exception.getMessage()).isEqualTo("입력된 비밀번호가 틀렸습니다.");
+
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordEncoder, times(1)).matches(oldPassword, encodedOldPassword);
+    }
+
+    @DisplayName("새 비밀번호가 이전 비밀번호와 동일하면 SAME_AS_OLD_PASSWORD 예외를 던진다.")
+    @Test
+    void updatePasswordWithSameAsOldPassword() {
+        // given
+        Long userId = 1L;
+        String email = "test@test.com";
+        String username = "name";
+        String oldPassword = "oldPassword123!";
+        String encodedOldPassword = "encodedOldPassword";
+
+        AuthUser authUser = new AuthUser(userId, email);
+        UserPasswordUpdateRequest dto = new UserPasswordUpdateRequest(oldPassword, oldPassword);
+        User user = new User(email, username, encodedOldPassword);
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(oldPassword, encodedOldPassword)).willReturn(true);
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.updatePassword(authUser, dto),
+                "SAME_AS_OLD_PASSWORD expected"
+        );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.SAME_AS_OLD_PASSWORD);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.CONFLICT);
+        assertThat(exception.getMessage()).isEqualTo("기존 비밀번호와 새 비밀번호가 같으면 안 됩니다.");
+
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordEncoder, times(1)).matches(oldPassword, encodedOldPassword);
     }
 }
