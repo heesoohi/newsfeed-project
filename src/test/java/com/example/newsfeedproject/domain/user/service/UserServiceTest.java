@@ -3,6 +3,7 @@ package com.example.newsfeedproject.domain.user.service;
 import com.example.newsfeedproject.common.config.PasswordEncoder;
 import com.example.newsfeedproject.common.exception.CustomException;
 import com.example.newsfeedproject.common.exception.ExceptionType;
+import com.example.newsfeedproject.domain.user.dto.response.UserFindByEmailResponse;
 import com.example.newsfeedproject.domain.user.dto.response.UserSaveResponse;
 import com.example.newsfeedproject.domain.user.entity.User;
 import com.example.newsfeedproject.domain.user.repository.UserRepository;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,7 +59,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 이메일로 유저 저장 시 CustomException 을 던진다.")
+    @DisplayName("중복된 이메일로 유저 저장 시 DUPLICATE_EMAIL Exception 을 던진다.")
     void saveWithDuplicateEmail() {
         // given
         String email = "test@test.com";
@@ -75,5 +78,50 @@ class UserServiceTest {
         assertThat(exception.getMessage()).isEqualTo("해당 이메일로 가입한 계정이 존재합니다.");
 
         verify(userRepository, times(1)).existsByEmail(email);
+    }
+
+    @DisplayName("이메일로 유저를 정상적으로 조회한다.")
+    @Test
+    void findByEmailSuccess() {
+        // given
+        String email = "test@test.com";
+        Long userId = 1L;
+        String encodedPassword = "encodedPassword";
+
+        User user = mock(User.class);
+        given(user.getUserId()).willReturn(userId);
+        given(user.getEmail()).willReturn(email);
+        given(user.getPassword()).willReturn(encodedPassword);
+        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+
+        // when
+        UserFindByEmailResponse foundUser = userService.findByEmail(email);
+
+        // then
+        assertThat(foundUser).isNotNull();
+        assertThat(foundUser.getUserId()).isEqualTo(userId);
+        assertThat(foundUser.getEmail()).isEqualTo(email);
+        assertThat(foundUser.getPassword()).isEqualTo(encodedPassword);
+
+        verify(userRepository, times(1)).findByEmail(email);
+    }
+
+    @DisplayName("존재하지 않는 이메일로 조회 시 INVALID_EMAIL Exception 을 던진다.")
+    @Test
+    void findByEmailWithInvalidEmail() {
+        // given
+        String email = "test@test.com";
+        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.findByEmail(email),
+                "INVALID_EMAIL expected"
+        );
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.INVALID_EMAIL);
+        assertThat(exception.getHttpStatus()).isEqualTo(org.springframework.http.HttpStatus.BAD_REQUEST);
+        assertThat(exception.getMessage()).isEqualTo("해당 이메일로 등록된 계정을 찾을 수 없습니다.");
+
+        verify(userRepository, times(1)).findByEmail(email);
     }
 }
