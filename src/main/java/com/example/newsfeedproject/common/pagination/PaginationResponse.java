@@ -23,7 +23,7 @@ public class PaginationResponse<T> {
     }
 
     @Getter
-    private static class PaginationInfo {
+    public static class PaginationInfo {
 
         private final int currentPage;
         private final int totalPages;
