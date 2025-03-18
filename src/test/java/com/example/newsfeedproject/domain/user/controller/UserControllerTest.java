@@ -5,6 +5,7 @@ import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.user.dto.request.UserPasswordUpdateRequest;
 import com.example.newsfeedproject.domain.user.dto.request.UserUpdateRequest;
+import com.example.newsfeedproject.domain.user.dto.request.UserWithdrawRequest;
 import com.example.newsfeedproject.domain.user.dto.response.UserResponse;
 import com.example.newsfeedproject.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,8 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.mockito.BDDMockito.given;
@@ -54,6 +54,7 @@ class UserControllerTest {
         given(userService.getUser(userId)).willReturn(userResponse);
 
         // when & then
+        // API 호출은 mockMvc 사용.
         mockMvc.perform(get("/users/{userId}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(userId))
@@ -165,6 +166,54 @@ class UserControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .requestAttr("authUser", authUser))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @DisplayName("회원 탈퇴 성공")
+    @Test
+    void withdrawUserSuccess() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserWithdrawRequest dto = new UserWithdrawRequest("Password123!");
+        doNothing().when(userService).withdraw(any(AuthUser.class), any(UserWithdrawRequest.class));
+
+        // when & then
+        mockMvc.perform(post("/users/withdraw")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .requestAttr("authUser", authUser))
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("회원 탈퇴 실패 - 유효하지 않은 요청")
+    @Test
+    void withdrawUserInvalidRequest() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserWithdrawRequest invalidDto = new UserWithdrawRequest("");
+
+        // when & then
+        mockMvc.perform(post("/users/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidDto))
+                        .requestAttr("authUser", authUser))
+                .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("회원 탈퇴 실패 - 권한 없음")
+    @Test
+    void withdrawUserUnauthorized() throws Exception {
+        // given
+        AuthUser authUser = new AuthUser(1L, "test@test.com");
+        UserWithdrawRequest dto = new UserWithdrawRequest("Password123!");
+        doThrow(new CustomException(ExceptionType.AUTHENTICATION_FAILED))
+                .when(userService).withdraw(any(AuthUser.class), any(UserWithdrawRequest.class));
+
+        // when & then
+        mockMvc.perform(post("/users/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .requestAttr("authUser", authUser))
                 .andExpect(status().isUnauthorized());
     }
 }
