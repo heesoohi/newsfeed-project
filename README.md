@@ -48,3 +48,78 @@
 ![image](https://github.com/user-attachments/assets/f4b1c772-efe9-4662-be2d-0f370ede3877)
 
 ## API 동작 예시
+
+- 회원가입
+<img width="825" alt="image" src="https://github.com/user-attachments/assets/8bb7417c-eb58-4bd6-9491-90ba190e8d43" />
+
+- 로그인
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/a27e88e1-8595-499a-81a4-93c07e5bea68" />
+
+- 프로필 조회(유저 정보 단건 조회)
+  <img width="814" alt="image" src="https://github.com/user-attachments/assets/3e3b1ae9-7ff6-49e4-9a56-09089319602f" />
+
+- 유저 정보 수정
+  <img width="813" alt="image" src="https://github.com/user-attachments/assets/ed6d0681-3708-4aa0-8cee-af893b4725f1" />
+
+- 유저 비밀번호 수정
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/fc073e6a-77c1-479b-be3f-ba476f026b59" />
+
+-회원 탈퇴
+<img width="819" alt="image" src="https://github.com/user-attachments/assets/2aaf51fc-e593-4d19-a21d-139f0e0177e9" />
+
+- 게시글 생성
+<img width="815" alt="image" src="https://github.com/user-attachments/assets/175f2f97-3301-4448-9c58-d79e177dfce4" />
+
+- 게시글 단건 조회
+<img width="816" alt="image" src="https://github.com/user-attachments/assets/2817cde4-14a7-491a-ab1e-faa3d6483c7d" />
+
+- 게시글 다건 조회
+<img width="820" alt="image" src="https://github.com/user-attachments/assets/11fa237f-787f-4eb6-8689-4f383f5c4089" />
+
+- 게시글 다건 조회 - 수정일 기준 정렬
+<img width="814" alt="image" src="https://github.com/user-attachments/assets/be631fe8-55c2-493a-b646-dab917a82691" />
+
+- 게시글 다건 조회 - 좋아요 순 정렬
+<img width="812" alt="image" src="https://github.com/user-attachments/assets/55248f28-4a40-4e96-ae8b-44575b2aa0cc" />
+
+- 게시글 다건 조회 - 기간별 검색
+<img width="819" alt="image" src="https://github.com/user-attachments/assets/d2ce9ce6-77ef-46b9-ae80-c30e35217f0d" />
+
+- 게시글 수정
+<img width="812" alt="image" src="https://github.com/user-attachments/assets/dd72479e-9640-4b24-b6b7-1a4d2543d121" />
+
+- 게시글 삭제
+<img width="817" alt="image" src="https://github.com/user-attachments/assets/9dcedb00-dbe7-4a63-98e6-3e37c0dc0e02" />
+
+- 팔로우
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/c7eed16b-22a8-4059-9404-e4059102f89f" />
+
+- 언팔로우
+<img width="805" alt="image" src="https://github.com/user-attachments/assets/3d415b2c-7166-4cf3-9814-4819eca1f947" />
+
+- 팔로잉의 게시글 다건 조회
+<img width="809" alt="image" src="https://github.com/user-attachments/assets/8842f8d3-4993-479f-975d-b4dfee802b4f" />
+
+- 댓글 생성
+<img width="812" alt="image" src="https://github.com/user-attachments/assets/31095194-03e4-4463-ba08-8a12ff98cff4" />
+
+- 댓글 다건 조회
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/4e1d1657-55f0-41f4-a844-911bbf0f836f" />
+
+- 댓글 수정
+<img width="814" alt="image" src="https://github.com/user-attachments/assets/4558d0a6-9cc9-45cd-a9e8-b0fcaa370b93" />
+
+- 댓글 삭제
+<img width="817" alt="image" src="https://github.com/user-attachments/assets/801087f0-3d9c-4461-a176-5c96a524a9fd" />
+
+- 게시글 좋아요
+<img width="812" alt="image" src="https://github.com/user-attachments/assets/5e068144-d357-4a49-8680-2d5d7a37679d" />
+
+- 게시글 좋아요 취소
+<img width="810" alt="image" src="https://github.com/user-attachments/assets/8d2bd33d-8d08-400c-86ed-0a75841c2b1a" />
+
+- 댓글 좋아요
+<img width="811" alt="image" src="https://github.com/user-attachments/assets/eb0a5349-fe69-4327-bcaf-51ede7eb7e68" />
+
+- 댓글 좋아요 취소
+- <img width="806" alt="image" src="https://github.com/user-attachments/assets/5da38339-4077-4409-9a3e-58c99677b973" />
