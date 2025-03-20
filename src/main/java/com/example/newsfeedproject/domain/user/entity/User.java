@@ -2,7 +2,6 @@ package com.example.newsfeedproject.domain.user.entity;
 
 import com.example.newsfeedproject.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,7 +36,7 @@ public class User extends BaseTimeEntity {
         this.password = password;
     }
 
-    public void increaseFollwerCount() {
+    public void increaseFollowerCount() {
         this.followerCount++;
     }
 

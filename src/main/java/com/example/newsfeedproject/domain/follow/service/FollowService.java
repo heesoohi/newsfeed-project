@@ -34,7 +34,7 @@ public class FollowService {
         followRepository.save(new Follow(fromUser, toUser));
 
         fromUser.increaseFollowingCount();
-        toUser.increaseFollwerCount();
+        toUser.increaseFollowerCount();
     }
 
     @Transactional
