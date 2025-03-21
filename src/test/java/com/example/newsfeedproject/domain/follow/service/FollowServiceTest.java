@@ -1,5 +1,7 @@
 package com.example.newsfeedproject.domain.follow.service;
 
+import com.example.newsfeedproject.common.exception.CustomException;
+import com.example.newsfeedproject.common.exception.ExceptionType;
 import com.example.newsfeedproject.domain.auth.dto.AuthUser;
 import com.example.newsfeedproject.domain.follow.entity.Follow;
 import com.example.newsfeedproject.domain.follow.repository.FollowRepository;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.util.Optional;
 
@@ -58,5 +61,29 @@ class FollowServiceTest {
         verify(fromUser, times(1)).increaseFollowingCount();
         verify(toUser, times(1)).increaseFollowerCount();
 
+    }
+
+    @DisplayName("저장되지 않은 유저가 팔로우 요청시 USER_NOT_FOUND 예외를 던진다.")
+    @Test
+    void followWithNotFound() {
+        // given
+        Long fromUserId = -1L;
+        Long toUserId = 2L;
+        AuthUser authUser = new AuthUser(fromUserId, "test1@test.com");
+
+        User fromUser = mock(User.class);
+        User toUser = mock(User.class);
+
+        given(userRepository.findById(fromUserId)).willReturn(Optional.empty());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> followService.follow(authUser, toUserId),
+                "User not found");
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.USER_NOT_FOUND);
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getMessage()).isEqualTo("해당 사용자를 찾을 수 없습니다.");
+
+        verify(userRepository, times(1)).findById(fromUserId);
     }
 }
