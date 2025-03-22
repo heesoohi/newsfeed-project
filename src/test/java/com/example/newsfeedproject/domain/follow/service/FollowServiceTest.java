@@ -114,4 +114,32 @@ class FollowServiceTest {
         verify(toUser, times(1)).decreaseFollowerCount();
 
     }
+    
+    @DisplayName("팔로우가 아닌 유저에 대해 언팔로우 요청 시 ALREADY_UNFOLLOWED 예외를 던진다.")
+    @Test
+    void unfollowWithAlreadyUnfollowed() {
+        // given
+        Long fromUserId = 1L;
+        Long toUserId = 2L;
+        AuthUser authUser = new AuthUser(fromUserId, "test1@test.com");
+
+        User fromUser = mock(User.class);
+        User toUser = mock(User.class);
+
+        given(userRepository.findById(fromUserId)).willReturn(Optional.of(fromUser));
+        given(userRepository.findById(toUserId)).willReturn(Optional.of(toUser));
+        given(followRepository.findByFromUserAndToUser(fromUser, toUser)).willReturn(Optional.empty());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> followService.unfollow(authUser, toUserId),
+                "Follow already unfollowed");
+        assertThat(exception.getExceptionType()).isEqualTo(ExceptionType.ALREADY_UNFOLLOWED);
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(exception.getMessage()).isEqualTo("요청이 정상적으로 처리되었지만, 해당 유저는 이미 팔로우 상태가 아닙니다.");
+
+        verify(userRepository, times(1)).findById(fromUserId);
+        verify(userRepository, times(1)).findById(toUserId);
+        verify(followRepository, times(1)).findByFromUserAndToUser(fromUser, toUser);
+    }
 }
