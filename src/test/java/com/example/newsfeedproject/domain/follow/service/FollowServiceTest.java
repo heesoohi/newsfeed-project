@@ -86,4 +86,32 @@ class FollowServiceTest {
 
         verify(userRepository, times(1)).findById(fromUserId);
     }
+
+    @DisplayName("유저가 다른 유저를 정상적으로 언팔로우한다.")
+    @Test
+    void unfollowSuccess() {
+        // given
+        Long fromUserId = 1L;
+        Long toUserId = 2L;
+        AuthUser authUser = new AuthUser(fromUserId, "test1@test.com");
+
+        User fromUser = mock(User.class);
+        User toUser = mock(User.class);
+        Follow follow = mock(Follow.class);
+
+        given(userRepository.findById(fromUserId)).willReturn(Optional.of(fromUser));
+        given(userRepository.findById(toUserId)).willReturn(Optional.of(toUser));
+        given(followRepository.findByFromUserAndToUser(fromUser, toUser)).willReturn(Optional.of(follow));
+
+        // when
+        followService.unfollow(authUser, toUserId);
+
+        // then
+        verify(userRepository, times(1)).findById(fromUserId);
+        verify(userRepository, times(1)).findById(toUserId);
+        verify(followRepository, times(1)).findByFromUserAndToUser(fromUser, toUser);
+        verify(fromUser, times(1)).decreaseFollowingCount();
+        verify(toUser, times(1)).decreaseFollowerCount();
+
+    }
 }
