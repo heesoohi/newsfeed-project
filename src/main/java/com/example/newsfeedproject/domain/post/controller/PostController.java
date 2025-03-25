@@ -18,11 +18,12 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;
 
-    @PostMapping("/posts")
+    @PostMapping
     public ResponseEntity<PostSaveResponse> savePost(
             @Auth AuthUser authUser,
             @Valid @RequestBody PostRequest dto
@@ -30,12 +31,12 @@ public class PostController {
         return ResponseEntity.ok(postService.savePost(authUser, dto));
     }
 
-    @GetMapping("/posts/{postId}")
+    @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPost(@PathVariable Long postId) {
         return ResponseEntity.ok(postService.getPost(postId));
     }
 
-    @GetMapping("/posts")
+    @GetMapping
     public ResponseEntity<PaginationResponse<PostResponse>> getAll(
             Pageable pageable,
             @RequestParam(required = false) String sort
@@ -43,7 +44,7 @@ public class PostController {
         return ResponseEntity.ok(postService.getAll(pageable, sort));
     }
 
-    @GetMapping("/posts/search")
+    @GetMapping("/search")
     public ResponseEntity<PaginationResponse<PostResponse>> searchPosts(
             Pageable pageable,
             @RequestParam(required = false) String sort,
@@ -53,7 +54,7 @@ public class PostController {
         return ResponseEntity.ok(postService.searchPosts(pageable, sort, startDate, endDate));
     }
 
-    @PutMapping("/posts/{postId}")
+    @PutMapping("/{postId}")
     public ResponseEntity<Void> updatePost(
             @Auth AuthUser authUser,
             @PathVariable Long postId,
@@ -63,7 +64,7 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/posts/{postId}")
+    @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @Auth AuthUser authUser,
             @PathVariable Long postId
@@ -72,7 +73,7 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/posts-following")
+    @GetMapping("/following")
     public ResponseEntity<PaginationResponse<PostResponse>> getFollowingPosts(
             @Auth AuthUser authUser,
             Pageable pageable

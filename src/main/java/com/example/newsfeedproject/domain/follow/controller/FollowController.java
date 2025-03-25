@@ -6,18 +6,16 @@ import com.example.newsfeedproject.domain.follow.service.FollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/follow")
 public class FollowController {
 
     private final FollowService followService;
 
-    @PostMapping("/follow/{targetUserId}")
+    @PostMapping("/{targetUserId}")
     public ResponseEntity<Void> follow(
             @Auth AuthUser authUser,
             @PathVariable Long targetUserId
@@ -26,7 +24,7 @@ public class FollowController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/follow/{targetUserId}")
+    @DeleteMapping("/{targetUserId}")
     public ResponseEntity<Void> unFollow(
             @Auth AuthUser authUser,
             @PathVariable Long targetUserId

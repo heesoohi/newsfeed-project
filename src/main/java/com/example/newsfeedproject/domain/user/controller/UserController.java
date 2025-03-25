@@ -15,18 +15,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
 
     // 유저 정보 단건 조회
-    @GetMapping("/users/{userId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUser (@PathVariable Long userId){
         return ResponseEntity.ok(userService.getUser(userId));
     }
 
     // 본인 프로필 수정
-    @PutMapping("/users")
+    @PutMapping
     public ResponseEntity<Void> updateUser (
             @Auth AuthUser authUser,
             @Valid @RequestBody UserUpdateRequest dto
@@ -35,7 +36,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping("/users/password")
+    @PutMapping("/password")
     public ResponseEntity<Void> updatePassword (
             @Auth AuthUser authUser,
             @Valid @RequestBody UserPasswordUpdateRequest dto
@@ -44,7 +45,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/users/withdraw")
+    @PostMapping("/withdraw")
     public ResponseEntity<Void> withdrawUser (
             @Auth AuthUser authUser,
             @Valid @RequestBody UserWithdrawRequest dto

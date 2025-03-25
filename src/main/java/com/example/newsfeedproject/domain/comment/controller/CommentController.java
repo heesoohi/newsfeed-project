@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/posts/{postId}/comments")
 public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/posts/{postId}/comments")
+    @PostMapping
     public ResponseEntity<CommentSaveResponse> saveComment(
             @Auth AuthUser authUser,
             @PathVariable Long postId,
@@ -29,7 +30,7 @@ public class CommentController {
         return ResponseEntity.ok(commentService.saveComment(authUser, postId, dto));
     }
 
-    @GetMapping("/posts/{postId}/comments")
+    @GetMapping
     public ResponseEntity<PaginationResponse<CommentResponse>> getAll(
             Pageable pageable,
             @PathVariable Long postId
@@ -37,7 +38,7 @@ public class CommentController {
         return ResponseEntity.ok(commentService.findAll(pageable, postId));
     }
 
-    @PutMapping("/posts/{postId}/comments/{commentId}")
+    @PutMapping("/{commentId}")
     public ResponseEntity<Void> updateComment(
             @Auth AuthUser authUser,
             @PathVariable Long postId,
@@ -48,7 +49,7 @@ public class CommentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/posts/{postId}/comments/{commentId}")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @Auth AuthUser authUser,
             @PathVariable Long postId,
