@@ -37,10 +37,6 @@ public class AuthService {
 //        System.out.println("dto password: " + dto.getPassword());
 //        System.out.println("user password: " + userResult.getPassword());
 
-        if (!passwordEncoder.matches(dto.getPassword(), userResult.getPassword())) {
-            throw new CustomException(ExceptionType.INVALID_PASSWORD);
-        }
-
         String bearerJwt = jwtUtil.createToken(userResult.getUserId(), userResult.getEmail());
 
         return new SigninResponse(userResult.getUserId(), bearerJwt);
